@@ -1,0 +1,19 @@
+{
+  "name": "RustMod.Editor",
+  "rootNamespace": "RustMod.Editor",
+  "references": [
+    "RustMod",
+    "stationeers.modding.exporter"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

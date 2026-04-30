@@ -1,0 +1,28 @@
+{
+  "name": "RustMod",
+  "rootNamespace": "RustMod",
+  "references": [
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [
+    "Editor",
+    "WindowsStandalone64"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "autoReferenced": true,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "Assembly-CSharp.dll",
+    "Assembly-CSharp-firstpass.dll",
+    "BepInEx.dll",
+    "0Harmony.dll",
+    "Brutal.RakNet.dll",
+    "LaunchPadBooster.dll",
+    "StationeersMods.Interface.dll",
+    "StationeersMods.Shared.dll"
+  ],
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

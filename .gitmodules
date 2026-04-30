@@ -1,0 +1,3 @@
+[submodule "Native/riscv_emu"]
+	path = Native/riscv_emu
+	url = https://github.com/Buzzec/riscv_emu.git
