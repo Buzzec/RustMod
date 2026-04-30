@@ -32,10 +32,7 @@ internal static class CircuitHousingPatch {
             __instance.Powered &&
             GameManager.GameState == GameState.Running && !WorldManager.IsGamePaused &&
             chip.ReadErrorState() != ErrorState.CompileError) {
-            var result = chip.Execute(__instance);
-            if (result != null) {
-                __instance.RaiseError(1);
-            }
+            chip.Execute();
         }
     }
 

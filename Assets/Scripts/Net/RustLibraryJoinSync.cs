@@ -8,7 +8,9 @@ internal sealed class RustLibraryJoinSync : IJoinSuffixSerializer {
     }
 
     public void DeserializeJoinSuffix(RocketBinaryReader reader) {
-        RustMod.Instance?.ApplyLibrarySnapshot(MessageIO.ReadBytes(reader));
+        var mod = RustMod.Instance;
+        mod?.ResetProgramLibrary();
+        mod?.ApplyLibrarySnapshot(MessageIO.ReadBytes(reader));
     }
 }
 }

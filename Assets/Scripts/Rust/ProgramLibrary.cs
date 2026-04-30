@@ -26,10 +26,13 @@ public sealed class ProgramLibrary : IDisposable, IRustDrop<ProgramLibrary> {
     }
 
     public IEnumerable<ProgramEntry> Programs() {
-        using var programs = Native.program_library_programs(_checked_ptr);
-
-        foreach (var program in programs.Items()) {
-            yield return program.ToWrapper();
+        var programs = Native.program_library_programs(_checked_ptr);
+        try {
+            foreach (var program in programs.Items()) {
+                yield return program.ToWrapper();
+            }
+        } finally {
+            ProgramEntryFFI.RustDropOwnedSlice(ref programs);
         }
     }
 
@@ -41,6 +44,10 @@ public sealed class ProgramLibrary : IDisposable, IRustDrop<ProgramLibrary> {
     public bool Deserialize(byte[] data) {
         data ??= Array.Empty<byte>();
         return Native.program_library_deserialize(_checked_ptr, data, (UIntPtr)data.Length);
+    }
+
+    public void Clear() {
+        Native.program_library_clear(_checked_ptr);
     }
 
     public ulong AddElf(string name, byte[] data) {
@@ -72,6 +79,9 @@ public sealed class ProgramLibrary : IDisposable, IRustDrop<ProgramLibrary> {
 
         [DllImport(RustFFI.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern OwnedByteSliceReturn program_library_serialize(IntPtr programLibrary);
+
+        [DllImport(RustFFI.DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void program_library_clear(IntPtr programLibrary);
 
         [DllImport(RustFFI.DllName, CallingConvention = CallingConvention.Cdecl)]
         [return: MarshalAs(UnmanagedType.I1)]

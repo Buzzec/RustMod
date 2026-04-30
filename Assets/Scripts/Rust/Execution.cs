@@ -24,8 +24,8 @@ public sealed class Execution : IDisposable, IRustDrop<Execution> {
         Dispose();
     }
 
-    public ExecutionStepResult Execute(ulong clocks, ProgramLibrary library) {
-        var result = Native.execution_execute(_checked_ptr, clocks, library.NativePtr);
+    public ExecutionStepResult Execute(ref ulong clocks, ProgramLibrary library) {
+        var result = Native.execution_execute(_checked_ptr, ref clocks, library.NativePtr);
         try {
             return result.ToWrapper();
         } finally {
@@ -49,6 +49,33 @@ public sealed class Execution : IDisposable, IRustDrop<Execution> {
         }
     }
 
+    public void Return1(ulong value) {
+        Native.execution_return_1_u64(_checked_ptr, value);
+    }
+
+    public void ReturnError(SyscallError error) {
+        if ((ulong)error == 0) {
+            error = SyscallError.UnknownError;
+        }
+
+        Native.execution_return_error(_checked_ptr, (ulong)error);
+    }
+
+    public ulong SyscallId => Native.execution_syscall_id(_checked_ptr);
+
+    public ulong SyscallArg(int index) {
+        return Native.execution_syscall_arg(_checked_ptr, (UIntPtr)index);
+    }
+
+    public bool WriteMemory(ulong address, byte[] data) {
+        data ??= Array.Empty<byte>();
+        return Native.execution_write_memory(_checked_ptr, address, data, (UIntPtr)data.Length);
+    }
+
+    public void Return6(long value0, long value1, long value2, long value3, long value4, long value5) {
+        Native.execution_return_6_i64(_checked_ptr, value0, value1, value2, value3, value4, value5);
+    }
+
     private static class Native {
         [DllImport(RustFFI.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void drop_execution(ref IntPtr execution);
@@ -60,7 +87,8 @@ public sealed class Execution : IDisposable, IRustDrop<Execution> {
         public static extern IntPtr execution_new(IntPtr library, ulong programKey);
 
         [DllImport(RustFFI.DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern ExecutionStepResultFFI execution_execute(IntPtr execution, ulong clocks, IntPtr library);
+        public static extern ExecutionStepResultFFI execution_execute(IntPtr execution, ref ulong clocks,
+            IntPtr library);
 
         [DllImport(RustFFI.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern OwnedByteSliceReturn execution_serialize(IntPtr execution);
@@ -73,6 +101,26 @@ public sealed class Execution : IDisposable, IRustDrop<Execution> {
 
         [DllImport(RustFFI.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern void drop_execution_step_result(ref ExecutionStepResultFFI result);
+
+        [DllImport(RustFFI.DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void execution_return_1_u64(IntPtr execution, ulong value);
+
+        [DllImport(RustFFI.DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void execution_return_error(IntPtr execution, ulong error);
+
+        [DllImport(RustFFI.DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern ulong execution_syscall_id(IntPtr execution);
+
+        [DllImport(RustFFI.DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern ulong execution_syscall_arg(IntPtr execution, UIntPtr index);
+
+        [DllImport(RustFFI.DllName, CallingConvention = CallingConvention.Cdecl)]
+        [return: MarshalAs(UnmanagedType.I1)]
+        public static extern bool execution_write_memory(IntPtr execution, ulong address, byte[] data, UIntPtr len);
+
+        [DllImport(RustFFI.DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void execution_return_6_i64(IntPtr execution, long value0, long value1, long value2,
+            long value3, long value4, long value5);
     }
 
     public static void RustDrop(ref IntPtr ptr) {
@@ -85,22 +133,28 @@ public sealed class Execution : IDisposable, IRustDrop<Execution> {
 }
 
 public enum ExecutionStatus {
-    Ok = 0,
     OutOfClocks = 1,
     Exit = 2,
     Hcf = 3,
     Yield = 4,
     Sleep = 5,
-    Log = 6,
+    HostSyscall = 6,
     Error = 255,
+}
+
+public enum SyscallError : ulong {
+    UnknownError = 1,
+    InvalidSyscall = 2,
+    OutOfMemory = 3,
+    DeviceNotFound = 4,
 }
 
 public readonly struct ExecutionStepResult {
     public readonly ExecutionStatus Status;
-    public readonly ulong Value;
+    public readonly UIntPtr Value;
     public readonly string Message;
 
-    public ExecutionStepResult(ExecutionStatus status, ulong value, string message) {
+    public ExecutionStepResult(ExecutionStatus status, UIntPtr value, string message) {
         Status = status;
         Value = value;
         Message = message;
@@ -110,7 +164,7 @@ public readonly struct ExecutionStepResult {
 [StructLayout(LayoutKind.Sequential)]
 public struct ExecutionStepResultFFI {
     public ExecutionStatus status;
-    public ulong value;
+    public UIntPtr value;
     public OwnedByteSliceReturn message;
 
     public ExecutionStepResult ToWrapper() {

@@ -1,5 +1,6 @@
 using Assets.Scripts.Objects.Motherboards;
 using Assets.Scripts.Networking;
+using Assets.Scripts.GridSystem;
 using Assets.Scripts;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -72,6 +73,7 @@ public class RustMod : ModBehaviour {
             return;
         }
 
+        _webServer.SetUploadsEnabled(HasCurrentGame());
         _webServer.ApplyPending();
         foreach (var upload in _webServer.DrainPendingUploads()) {
             if (NetworkManager.IsClient) {
@@ -85,6 +87,10 @@ public class RustMod : ModBehaviour {
         }
     }
 
+    private static bool HasCurrentGame() {
+        return GameManager.GameState == GameState.Running || GameManager.GameState == GameState.Paused;
+    }
+
     public byte[] CaptureLibraryState() {
         return _programLibrary?.Serialize() ?? Array.Empty<byte>();
     }
@@ -92,6 +98,10 @@ public class RustMod : ModBehaviour {
     public string CaptureLibraryStateBase64() {
         var bytes = CaptureLibraryState();
         return bytes.Length == 0 ? string.Empty : Convert.ToBase64String(bytes);
+    }
+
+    public void ResetProgramLibrary() {
+        _programLibrary?.Clear();
     }
 
     public void ApplyLibraryStateBase64(string base64) {

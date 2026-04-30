@@ -14,5 +14,8 @@ public sealed class RiscVChipSaveData : DynamicThingSaveData {
 
     [XmlElement]
     public string LastMessage = string.Empty;
+
+    [XmlElement]
+    public double SleepRemainingSeconds;
 }
 }

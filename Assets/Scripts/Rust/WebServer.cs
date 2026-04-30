@@ -24,14 +24,22 @@ public sealed class WebServer : IDisposable, IRustDrop<WebServer> {
         return Native.webserver_apply_pending(_checked_ptr);
     }
 
+    public void SetUploadsEnabled(bool enabled) {
+        Native.webserver_set_uploads_enabled(_checked_ptr, enabled);
+    }
+
     public ProgramLibrary ProgramLibrary() {
         return new ProgramLibrary(Native.webserver_program_library(_checked_ptr));
     }
 
     public IEnumerable<PendingUpload> DrainPendingUploads() {
-        using var uploads = Native.webserver_drain_pending_uploads(_checked_ptr);
-        foreach (var upload in uploads.Items()) {
-            yield return upload.ToWrapper();
+        var uploads = Native.webserver_drain_pending_uploads(_checked_ptr);
+        try {
+            foreach (var upload in uploads.Items()) {
+                yield return upload.ToWrapper();
+            }
+        } finally {
+            PendingUploadFFI.RustDropOwnedSlice(ref uploads);
         }
     }
 
@@ -56,6 +64,11 @@ public sealed class WebServer : IDisposable, IRustDrop<WebServer> {
 
         [DllImport(RustFFI.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr webserver_apply_pending(IntPtr webServer);
+
+        [DllImport(RustFFI.DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void webserver_set_uploads_enabled(
+            IntPtr webServer,
+            [MarshalAs(UnmanagedType.I1)] bool enabled);
 
         [DllImport(RustFFI.DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr webserver_program_library(IntPtr webServer);

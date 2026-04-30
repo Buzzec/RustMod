@@ -20,7 +20,8 @@
     "Brutal.RakNet.dll",
     "LaunchPadBooster.dll",
     "StationeersMods.Interface.dll",
-    "StationeersMods.Shared.dll"
+    "StationeersMods.Shared.dll",
+    "UniTask.dll"
   ],
   "defineConstraints": [],
   "versionDefines": [],

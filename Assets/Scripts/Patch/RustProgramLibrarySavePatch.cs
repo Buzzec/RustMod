@@ -5,6 +5,12 @@ using HarmonyLib;
 namespace RustMod.Patch {
 [HarmonyPatch]
 internal static class RustProgramLibrarySavePatch {
+    [HarmonyPatch(typeof(XmlSaveLoad), nameof(XmlSaveLoad.LoadWorld))]
+    [HarmonyPrefix]
+    public static void ResetLibraryForWorldLoad() {
+        RustMod.Instance?.ResetProgramLibrary();
+    }
+
     [HarmonyPatch(typeof(XmlSaveLoad), nameof(XmlSaveLoad.GetWorldData))]
     [HarmonyPostfix]
     public static void AddLibrarySaveData(XmlSaveLoad.WorldData __result) {
@@ -27,7 +33,9 @@ internal static class RustProgramLibrarySavePatch {
             return true;
         }
 
-        RustMod.Instance?.ApplyLibraryStateBase64(librarySaveData.LibraryState);
+        var mod = RustMod.Instance;
+        mod?.ResetProgramLibrary();
+        mod?.ApplyLibraryStateBase64(librarySaveData.LibraryState);
         __result = null;
         return false;
     }

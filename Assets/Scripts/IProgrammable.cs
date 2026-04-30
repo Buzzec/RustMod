@@ -11,9 +11,7 @@ public interface IProgrammable : IReferencable {
     /// <summary>
     /// Executes the chip. Base game limits to 128 instructions.
     /// </summary>
-    /// <returns>The error if encountered, null otherwise.</returns>
-    [CanBeNull]
-    public string Execute(ICircuitHolder holder);
+    public void Execute();
 
     public void AppendErrorsToActionInstance(Thing.DelayedActionInstance actionInstance, Interactable interactable,
         Interaction interaction, bool doAction);
@@ -28,14 +26,14 @@ public interface IProgrammable : IReferencable {
     ///
     /// Implementers should reset the chip.
     /// </summary>
-    public void Placed(Device device);
+    public void Placed(ICircuitHolder device);
 
     /// <summary>
     /// Called when removed from a slot.
     ///
     /// Implementers should reset the chip.
     /// </summary>
-    public void Unplaced(Device device);
+    public void Unplaced(ICircuitHolder device);
 
     public double ReadMemory(int address);
     public void WriteMemory(int address, double value);
