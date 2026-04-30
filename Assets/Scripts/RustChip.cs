@@ -9,6 +9,7 @@ using Assets.Scripts.Util;
 using Cysharp.Threading.Tasks;
 using Reagents;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -18,7 +19,7 @@ public class RustChip : Item, IProgrammable {
     private const ulong ClocksPerTick = 1024 * 1024 * 1024;
 
     private Execution _execution;
-    private ulong _programKey;
+    private ulong? _programKey;
     private ErrorState _errorState = ErrorState.None;
     private string _lastMessage = string.Empty;
     private double _sleepUntilTime;
@@ -107,29 +108,51 @@ public class RustChip : Item, IProgrammable {
                 case 0x10_16: ReturnCanLogic(subDevice: false, write: true); break;
                 case 0x10_17: ReturnCanLogic(subDevice: true, write: false); break;
                 case 0x10_18: ReturnCanLogic(subDevice: true, write: true); break;
-                case 0x11_00: ReturnReadDevice(DeviceByRegister(_execution.SyscallArg(0)), _execution.SyscallArg(1)); break;
+                case 0x11_00:
+                    ReturnReadDevice(DeviceByRegister(_execution.SyscallArg(0)), _execution.SyscallArg(1)); break;
                 case 0x11_01: ReturnReadDevice(DeviceById(_execution.SyscallArg(0)), _execution.SyscallArg(1)); break;
-                case 0x11_02: ReturnReadDevice(SubDevice(DeviceByRegister(_execution.SyscallArg(0)), _execution.SyscallArg(1)), _execution.SyscallArg(2)); break;
-                case 0x11_03: ReturnReadDevice(SubDevice(DeviceById(_execution.SyscallArg(0)), _execution.SyscallArg(1)), _execution.SyscallArg(2)); break;
+                case 0x11_02:
+                    ReturnReadDevice(SubDevice(DeviceByRegister(_execution.SyscallArg(0)), _execution.SyscallArg(1)),
+                        _execution.SyscallArg(2)); break;
+                case 0x11_03:
+                    ReturnReadDevice(SubDevice(DeviceById(_execution.SyscallArg(0)), _execution.SyscallArg(1)),
+                        _execution.SyscallArg(2)); break;
                 case 0x11_04: ReturnReadBatch(subDevice: false, named: false); break;
                 case 0x11_05: ReturnReadBatch(subDevice: true, named: false); break;
                 case 0x11_06: ReturnReadBatch(subDevice: false, named: true); break;
                 case 0x11_07: ReturnReadBatch(subDevice: true, named: true); break;
-                case 0x11_10: ReturnWriteDevice(DeviceByRegister(_execution.SyscallArg(0)), _execution.SyscallArg(1), _execution.SyscallArg(2)); break;
-                case 0x11_11: ReturnWriteDevice(DeviceById(_execution.SyscallArg(0)), _execution.SyscallArg(1), _execution.SyscallArg(2)); break;
-                case 0x11_12: ReturnWriteDevice(SubDevice(DeviceByRegister(_execution.SyscallArg(0)), _execution.SyscallArg(1)), _execution.SyscallArg(2), _execution.SyscallArg(3)); break;
-                case 0x11_13: ReturnWriteDevice(SubDevice(DeviceById(_execution.SyscallArg(0)), _execution.SyscallArg(1)), _execution.SyscallArg(2), _execution.SyscallArg(3)); break;
+                case 0x11_10:
+                    ReturnWriteDevice(DeviceByRegister(_execution.SyscallArg(0)), _execution.SyscallArg(1),
+                        _execution.SyscallArg(2)); break;
+                case 0x11_11:
+                    ReturnWriteDevice(DeviceById(_execution.SyscallArg(0)), _execution.SyscallArg(1),
+                        _execution.SyscallArg(2)); break;
+                case 0x11_12:
+                    ReturnWriteDevice(SubDevice(DeviceByRegister(_execution.SyscallArg(0)), _execution.SyscallArg(1)),
+                        _execution.SyscallArg(2), _execution.SyscallArg(3)); break;
+                case 0x11_13:
+                    ReturnWriteDevice(SubDevice(DeviceById(_execution.SyscallArg(0)), _execution.SyscallArg(1)),
+                        _execution.SyscallArg(2), _execution.SyscallArg(3)); break;
                 case 0x11_14: ReturnWriteBatch(subDevice: false, named: false); break;
                 case 0x11_15: ReturnWriteBatch(subDevice: true, named: false); break;
                 case 0x11_16: ReturnWriteBatch(subDevice: false, named: true); break;
                 case 0x11_17: ReturnWriteBatch(subDevice: true, named: true); break;
-                case 0x11_20: ReturnReadReagent(DeviceByRegister(_execution.SyscallArg(0)), _execution.SyscallArg(1), _execution.SyscallArg(2)); break;
-                case 0x11_21: ReturnReadReagent(DeviceById(_execution.SyscallArg(0)), _execution.SyscallArg(1), _execution.SyscallArg(2)); break;
+                case 0x11_20:
+                    ReturnReadReagent(DeviceByRegister(_execution.SyscallArg(0)), _execution.SyscallArg(1),
+                        _execution.SyscallArg(2)); break;
+                case 0x11_21:
+                    ReturnReadReagent(DeviceById(_execution.SyscallArg(0)), _execution.SyscallArg(1),
+                        _execution.SyscallArg(2)); break;
                 case 0x11_30: ReturnClearStack(DeviceByRegister(_execution.SyscallArg(0))); break;
                 case 0x11_31: ReturnClearStack(DeviceById(_execution.SyscallArg(0))); break;
-                case 0x11_32: ReturnPutStack(DeviceByRegister(_execution.SyscallArg(0)), _execution.SyscallArg(1), _execution.SyscallArg(2)); break;
-                case 0x11_33: ReturnPutStack(DeviceById(_execution.SyscallArg(0)), _execution.SyscallArg(1), _execution.SyscallArg(2)); break;
-                case 0x11_34: ReturnGetStack(DeviceByRegister(_execution.SyscallArg(0)), _execution.SyscallArg(1)); break;
+                case 0x11_32:
+                    ReturnPutStack(DeviceByRegister(_execution.SyscallArg(0)), _execution.SyscallArg(1),
+                        _execution.SyscallArg(2)); break;
+                case 0x11_33:
+                    ReturnPutStack(DeviceById(_execution.SyscallArg(0)), _execution.SyscallArg(1),
+                        _execution.SyscallArg(2)); break;
+                case 0x11_34:
+                    ReturnGetStack(DeviceByRegister(_execution.SyscallArg(0)), _execution.SyscallArg(1)); break;
                 case 0x11_35: ReturnGetStack(DeviceById(_execution.SyscallArg(0)), _execution.SyscallArg(1)); break;
                 default: _execution.ReturnError(SyscallError.InvalidSyscall); break;
             }
@@ -152,7 +175,7 @@ public class RustChip : Item, IProgrammable {
 
     private void ReturnDeviceList(bool full) {
         var ptr = _execution.SyscallArg(0);
-        var len = (int)Math.Min(_execution.SyscallArg(1), full ? 16UL : 16UL);
+        var len = (int)Math.Min(_execution.SyscallArg(1), 16UL);
         var offset = (int)Math.Min(_execution.SyscallArg(2), int.MaxValue);
         var devices = GetDevices();
         var count = Math.Max(0, Math.Min(len, devices.Count - Math.Min(offset, devices.Count)));
@@ -374,13 +397,14 @@ public class RustChip : Item, IProgrammable {
 
     private static ILogicable DeviceById(ulong id) => Thing.Find(unchecked((long)id)) as ILogicable;
 
-    private static ILogicable SubDevice(ILogicable device, ulong slotIndex) => device?.GetSlot((int)slotIndex)?.Get<ILogicable>();
+    private static ILogicable SubDevice(ILogicable device, ulong slotIndex) =>
+        device?.GetSlot((int)slotIndex)?.Get<ILogicable>();
 
     private IEnumerable<ILogicable> MatchingDevices(ulong prefabHash, ulong? nameHash) {
         var prefab = unchecked((int)prefabHash);
-        var name = nameHash.HasValue ? unchecked((int)nameHash.Value) : 0;
+        var nameHashInt = nameHash.HasValue ? unchecked((int)nameHash.Value) : 0;
         foreach (var device in GetDevices()) {
-            if (device.GetPrefabHash() == prefab && (!nameHash.HasValue || device.GetNameHash() == name)) {
+            if (device.GetPrefabHash() == prefab && (!nameHash.HasValue || device.GetNameHash() == nameHashInt)) {
                 yield return device;
             }
         }
@@ -388,14 +412,12 @@ public class RustChip : Item, IProgrammable {
 
     private static string DeviceName(ILogicable device) => device.GetAsThing.DisplayName ?? string.Empty;
 
-    private bool ReturnMemoryWrite(ulong ptr, byte[] bytes, ulong ret) {
+    private void ReturnMemoryWrite(ulong ptr, byte[] bytes, ulong ret) {
         if (!_execution.WriteMemory(ptr, bytes)) {
             _execution.ReturnError(SyscallError.InvalidSyscall);
-            return false;
+        } else {
+            _execution.Return1(ret);
         }
-
-        _execution.Return1(ret);
-        return true;
     }
 
     private static bool TryLogicType(ulong raw, out LogicType logicType) {
@@ -415,13 +437,12 @@ public class RustChip : Item, IProgrammable {
 
     private static double ApplyBatch(List<double> values, LogicBatchMethod mode) {
         var result = values[0];
-        for (var i = 1; i < values.Count; i++) {
-            result = mode switch {
-                LogicBatchMethod.Minimum => Math.Min(result, values[i]),
-                LogicBatchMethod.Maximum => Math.Max(result, values[i]),
-                _ => result + values[i],
-            };
-        }
+
+        result = values.Aggregate(result, (current, value) => mode switch {
+            LogicBatchMethod.Minimum => Math.Min(current, value),
+            LogicBatchMethod.Maximum => Math.Max(current, value),
+            _ => current + value,
+        });
 
         return mode == LogicBatchMethod.Average ? result / values.Count : result;
     }
@@ -454,6 +475,7 @@ public class RustChip : Item, IProgrammable {
 
     public void AppendErrorsToActionInstance(DelayedActionInstance actionInstance, Interactable interactable,
         Interaction interaction, bool doAction) {
+        actionInstance.AppendStateMessage($"Loaded Program: {(_programKey.HasValue ? _programKey.Value : "None")}");
         if (_errorState != ErrorState.None && !string.IsNullOrEmpty(_lastMessage)) {
             actionInstance.AppendStateMessage(_lastMessage);
         }
@@ -471,14 +493,14 @@ public class RustChip : Item, IProgrammable {
         throw new NotImplementedException();
     }
 
-    public void AssignProgramServer(ulong programKey) {
+    public void AssignProgramServer(ulong? programKey) {
         if (RustMod.Instance == null) {
             return;
         }
 
         try {
             _execution?.Dispose();
-            _execution = programKey == 0 ? null : new Execution(RustMod.Instance.ProgramLibrary, programKey);
+            _execution = programKey.HasValue ? new Execution(RustMod.Instance.ProgramLibrary, programKey.Value) : null;
             _programKey = programKey;
             _errorState = ErrorState.None;
             _lastMessage = string.Empty;
@@ -546,7 +568,12 @@ public class RustChip : Item, IProgrammable {
 
     public override void SerializeOnJoin(RocketBinaryWriter writer) {
         base.SerializeOnJoin(writer);
-        writer.WriteUInt64(_programKey);
+        if (_programKey.HasValue) {
+            writer.WriteBoolean(true);
+            writer.WriteUInt64(_programKey.Value);
+        } else {
+            writer.WriteBoolean(false);
+        }
         writer.WriteInt32((int)_errorState);
         writer.WriteString(_lastMessage ?? string.Empty);
         writer.WriteUInt64(DoubleBits(SleepRemainingSeconds()));
@@ -555,7 +582,11 @@ public class RustChip : Item, IProgrammable {
 
     public override void DeserializeOnJoin(RocketBinaryReader reader) {
         base.DeserializeOnJoin(reader);
-        _programKey = reader.ReadUInt64();
+        if (reader.ReadBoolean()) {
+            _programKey = reader.ReadUInt64();
+        } else {
+            _programKey = null;
+        }
         _errorState = (ErrorState)reader.ReadInt32();
         _lastMessage = reader.ReadString();
         RestoreSleep(BitConverter.Int64BitsToDouble(unchecked((long)reader.ReadUInt64())));
@@ -568,7 +599,12 @@ public class RustChip : Item, IProgrammable {
             return;
         }
 
-        writer.WriteUInt64(_programKey);
+        if (_programKey.HasValue) {
+            writer.WriteBoolean(true);
+            writer.WriteUInt64(_programKey.Value);
+        } else {
+            writer.WriteBoolean(false);
+        }
         writer.WriteInt32((int)_errorState);
         writer.WriteString(_lastMessage ?? string.Empty);
         writer.WriteUInt64(DoubleBits(SleepRemainingSeconds()));
@@ -581,7 +617,11 @@ public class RustChip : Item, IProgrammable {
             return;
         }
 
-        _programKey = reader.ReadUInt64();
+        if (reader.ReadBoolean()) {
+            _programKey = reader.ReadUInt64();
+        } else {
+            _programKey = null;
+        }
         _errorState = (ErrorState)reader.ReadInt32();
         _lastMessage = reader.ReadString();
         RestoreSleep(BitConverter.Int64BitsToDouble(unchecked((long)reader.ReadUInt64())));
