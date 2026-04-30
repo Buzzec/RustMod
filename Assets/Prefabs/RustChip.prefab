@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 3570607867384673174}
   - component: {fileID: 2643598376724680536}
   m_Layer: 0
-  m_Name: TestChip
+  m_Name: RustChip
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -57,8 +57,8 @@ MonoBehaviour:
   Forward: {x: 0, y: 0, z: 0}
   HideInStationpedia: 0
   IsEmergency: 0
-  PrefabName: TestChip
-  PrefabHash: -948194066
+  PrefabName: RustChip
+  PrefabHash: 1724522919
   ThingTransform: {fileID: 3348600389556727816}
   Slots: []
   Bounds:
