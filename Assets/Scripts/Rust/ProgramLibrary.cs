@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace RustMod {
 public sealed class ProgramLibrary : IDisposable, IRustDrop<ProgramLibrary> {
-    private IntPtr _ptr = RustFFI.Call(Native.new_program_library);
+    private IntPtr _ptr = Native.new_program_library();
 
     private IntPtr _checked_ptr => _ptr == IntPtr.Zero ? throw new NullReferenceException() : _ptr;
     internal IntPtr NativePtr => _checked_ptr;
@@ -20,7 +20,7 @@ public sealed class ProgramLibrary : IDisposable, IRustDrop<ProgramLibrary> {
     }
 
     public IEnumerable<ProgramEntry> Programs() {
-        using var programs = RustFFI.Call(() => Native.program_library_programs(_checked_ptr));
+        using var programs = Native.program_library_programs(_checked_ptr);
 
         foreach (var program in programs.Items()) {
             yield return program.ToWrapper();
@@ -43,11 +43,11 @@ public sealed class ProgramLibrary : IDisposable, IRustDrop<ProgramLibrary> {
     }
 
     public static void RustDrop(ref IntPtr ptr) {
-        RustFFI.Call(Native.drop_program_library, ref ptr);
+        Native.drop_program_library(ref ptr);
     }
 
     public static void RustDropOwnedSlice(ref OwnedSliceReturn<ProgramLibrary> ownedSliceReturn) {
-        RustFFI.Call(Native.drop_owned_slice_program_library, ref ownedSliceReturn);
+        Native.drop_owned_slice_program_library(ref ownedSliceReturn);
     }
 }
 }

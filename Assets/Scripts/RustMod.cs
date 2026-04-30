@@ -11,7 +11,7 @@ namespace RustMod {
 [StationeersMod(PluginGuid, PluginName, PluginVersion)]
 public class RustMod : ModBehaviour {
     private const string PluginGuid = "net.buzzec.RustMod";
-    private const string PluginName = "RustMod";
+    public const string PluginName = "RustMod";
     private const string PluginVersion = "0.1.0";
     private const string PluginLongVersion = PluginVersion;
     private static readonly Mod MOD = new(PluginName, PluginLongVersion);
@@ -28,7 +28,7 @@ public class RustMod : ModBehaviour {
                 MOD.SetupPrefabs().IgnoreEmpty().SetBlueprintMaterials();
                 MOD.SetupPrefabs("TestChip").SetPaintableColor(ColorType.Black);
 
-                Debug.Log($"Loaded {content.prefabs.Count} prefabs");
+                Debug.Log($"[{PluginName}] Loaded {content.prefabs.Count} prefabs");
 
                 _initialized = true;
             }
@@ -36,11 +36,13 @@ public class RustMod : ModBehaviour {
             _harmony = new Harmony(PluginGuid);
             _harmony.CreateClassProcessor(typeof(CircuitHousingPatch)).Patch();
 
+            RustFFI.EnsureLoaded();
+
             _webServer = new WebServer();
 
-            Debug.LogWarning("Loaded");
+            Debug.LogWarning($"[{PluginName}] Loaded");
         } catch (Exception ex) {
-            Debug.LogError($"Error during OnLoaded: {ex}");
+            Debug.LogError($"[{PluginName}] Error during OnLoaded: {ex}");
         }
     }
 

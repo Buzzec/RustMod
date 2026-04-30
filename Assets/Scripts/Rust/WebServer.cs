@@ -8,7 +8,7 @@ public sealed class WebServer : IDisposable, IRustDrop<WebServer> {
     private IntPtr _checked_ptr => _ptr == IntPtr.Zero ? throw new NullReferenceException() : _ptr;
 
     public WebServer(string bindAddress = "127.0.0.1", ushort port = 3302) {
-        _ptr = RustFFI.Call(() => Native.start_program_webserver(bindAddress, port));
+        _ptr = Native.start_program_webserver(bindAddress, port);
 
         if (_ptr == IntPtr.Zero) {
             throw new InvalidOperationException($"Failed to start Rust webserver on {bindAddress}:{port}");
@@ -20,7 +20,7 @@ public sealed class WebServer : IDisposable, IRustDrop<WebServer> {
     }
 
     public UIntPtr ApplyPending(ProgramLibrary programLibrary) {
-        return RustFFI.Call(() => Native.webserver_apply_pending(_checked_ptr, programLibrary.NativePtr));
+        return Native.webserver_apply_pending(_checked_ptr, programLibrary.NativePtr);
     }
 
     public void Dispose() {
@@ -47,11 +47,11 @@ public sealed class WebServer : IDisposable, IRustDrop<WebServer> {
     }
 
     public static void RustDrop(ref IntPtr ptr) {
-        RustFFI.Call(Native.drop_web_server, ref ptr);
+        Native.drop_web_server(ref ptr);
     }
 
     public static void RustDropOwnedSlice(ref OwnedSliceReturn<ProgramLibrary> ownedSliceReturn) {
-        RustFFI.Call(Native.drop_owned_slice_web_server, ref ownedSliceReturn);
+        Native.drop_owned_slice_web_server(ref ownedSliceReturn);
     }
 }
 }

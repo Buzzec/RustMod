@@ -31,11 +31,11 @@ public struct ProgramEntryFFI : IRustDrop<ProgramEntryFFI> {
     }
 
     public static void RustDrop(ref IntPtr ptr) {
-        RustFFI.Call(Native.drop_program_entry, ref ptr);
+        Native.drop_program_entry(ref ptr);
     }
 
     public static void RustDropOwnedSlice(ref OwnedSliceReturn<ProgramEntryFFI> ownedSliceReturn) {
-        RustFFI.Call(Native.drop_owned_slice_program_entry, ref ownedSliceReturn);
+        Native.drop_owned_slice_program_entry(ref ownedSliceReturn);
     }
 }
 }

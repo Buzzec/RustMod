@@ -18,6 +18,7 @@ public static class RustNativeExportHook {
     }
 
     private static void RegisterBuildHandler() {
+        BuildPlayerWindow.RegisterBuildPlayerHandler(null);
         BuildPlayerWindow.RegisterBuildPlayerHandler(OnBuildButtonPressed);
     }
 
