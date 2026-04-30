@@ -19,8 +19,12 @@ public sealed class WebServer : IDisposable, IRustDrop<WebServer> {
         Dispose();
     }
 
-    public UIntPtr ApplyPending(ProgramLibrary programLibrary) {
-        return Native.webserver_apply_pending(_checked_ptr, programLibrary.NativePtr);
+    public UIntPtr ApplyPending() {
+        return Native.webserver_apply_pending(_checked_ptr);
+    }
+
+    public ProgramLibrary ProgramLibrary() {
+        return new ProgramLibrary(Native.webserver_program_library(_checked_ptr));
     }
 
     public void Dispose() {
@@ -43,7 +47,10 @@ public sealed class WebServer : IDisposable, IRustDrop<WebServer> {
             ushort port);
 
         [DllImport(RustFFI.DllName, CallingConvention = CallingConvention.Cdecl)]
-        public static extern UIntPtr webserver_apply_pending(IntPtr webServer, IntPtr programLibrary);
+        public static extern UIntPtr webserver_apply_pending(IntPtr webServer);
+
+        [DllImport(RustFFI.DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr webserver_program_library(IntPtr webServer);
     }
 
     public static void RustDrop(ref IntPtr ptr) {

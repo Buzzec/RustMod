@@ -19,6 +19,7 @@ public class RustMod : ModBehaviour {
 
     [CanBeNull] private Harmony _harmony = null;
     [CanBeNull] private WebServer _webServer = null;
+    [CanBeNull] private ProgramLibrary _programLibrary = null;
 
     public override void OnLoaded(ContentHandler content) {
         base.OnLoaded(content);
@@ -39,6 +40,7 @@ public class RustMod : ModBehaviour {
             RustFFI.EnsureLoaded();
 
             _webServer = new WebServer();
+            _programLibrary = _webServer.ProgramLibrary();
 
             Debug.LogWarning($"[{PluginName}] Loaded");
         } catch (Exception ex) {
@@ -48,6 +50,8 @@ public class RustMod : ModBehaviour {
 
     private void OnDestroy() {
         _harmony?.UnpatchSelf();
+        _programLibrary?.Dispose();
+        _programLibrary = null;
         _webServer?.Dispose();
         _webServer = null;
     }
