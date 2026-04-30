@@ -11,9 +11,7 @@ public static class RustFFI {
     public const string DllName = "stationeers_emu";
     private const string DllFileName = DllName + ".dll";
     private const string NativePayloadFileName = DllName + ".native";
-
-    public delegate void RefAction<T>(ref T value);
-
+    
     private static IntPtr _nativeLibrary;
     private static readonly Native.DebugLogCallback DebugLogCallback = LogFromRust;
     private static readonly ConcurrentQueue<DebugLogEntry> PendingLogs = new();
